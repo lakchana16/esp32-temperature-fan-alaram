@@ -1,0 +1,385 @@
+{
+  "format": "velxio-project",
+  "version": 1,
+  "exportedAt": "2026-10-06T03:56:14.157Z",
+  "name": "esp32-temperature-fan-alarm",
+  "boards": [
+    {
+      "id": "esp32",
+      "boardKind": "esp32",
+      "x": 50,
+      "y": 50,
+      "activeFileGroupId": "group-esp32",
+      "languageMode": "arduino",
+      "serialBaudRate": 0
+    }
+  ],
+  "fileGroups": {
+    "group-esp32": [
+      {
+        "name": "sketch.ino",
+        "content": "#define NTC_PIN     34\n#define RELAY_PIN   26\n#define BUZZER_PIN  25\n\n// Temperature limit\n#define HIGH_TEMP   50.0\n\n// NTC parameters\n#define SERIES_RESISTOR     10000.0\n#define NOMINAL_RESISTANCE  10000.0\n#define NOMINAL_TEMP       25.0\n#define BETA_COEFFICIENT   3950.0\n\nvoid setup()\n{\n  Serial.begin(115200);\n\n  pinMode(RELAY_PIN, OUTPUT);\n  pinMode(BUZZER_PIN, OUTPUT);\n\n  digitalWrite(RELAY_PIN, LOW);\n  noTone(BUZZER_PIN);\n\n  analogReadResolution(12);\n}\n\nvoid loop()\n{\n  int adcValue = analogRead(NTC_PIN);\n\n  // Prevent division by zero\n  if (adcValue == 0)\n    adcValue = 1;\n\n  // Convert ADC value to resistance\n  float resistance = SERIES_RESISTOR *\n                     ((4095.0 / adcValue) - 1.0);\n\n  // Calculate temperature\n  float steinhart;\n\n  steinhart = resistance / NOMINAL_RESISTANCE;\n  steinhart = log(steinhart);\n  steinhart /= BETA_COEFFICIENT;\n  steinhart += 1.0 / (NOMINAL_TEMP + 273.15);\n  steinhart = 1.0 / steinhart;\n  steinhart -= 273.15;\n\n  Serial.print(\"Temperature: \");\n  Serial.print(steinhart);\n  Serial.println(\" °C\");\n\n  // HIGH TEMPERATURE\n  if (steinhart >= HIGH_TEMP)\n  {\n    // Turn ON fan\n    digitalWrite(RELAY_PIN, HIGH);\n\n    // Buzzer ON\n    tone(BUZZER_PIN, 2000);\n\n    Serial.println(\"WARNING! HIGH TEMPERATURE\");\n    Serial.println(\"Fan ON\");\n    Serial.println(\"Buzzer ON\");\n\n    delay(500);\n\n    // Buzzer OFF\n    noTone(BUZZER_PIN);\n\n    delay(500);\n  }\n\n  // NORMAL TEMPERATURE\n  else\n  {\n    digitalWrite(RELAY_PIN, LOW);\n    noTone(BUZZER_PIN);\n\n    Serial.println(\"Temperature Normal\");\n    Serial.println(\"Fan OFF\");\n    Serial.println(\"Buzzer OFF\");\n\n    delay(1000);\n  }\n}"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "buzzer_1790134592638_bisq61qpe",
+      "metadataId": "buzzer",
+      "x": 354.07682137521556,
+      "y": 151.00851128891296,
+      "properties": {
+        "hasSignal": "false",
+        "rotation": 90
+      }
+    },
+    {
+      "id": "pro_dc_motor_1790134625330_9yo7kzxn4",
+      "metadataId": "pro-dc-motor",
+      "x": 360.52248548082065,
+      "y": 50.87014975429564,
+      "properties": {
+        "rotation": 270
+      }
+    },
+    {
+      "id": "grove_relay_1790134646230_pvd2572ep",
+      "metadataId": "grove-relay",
+      "x": 414.20843589404376,
+      "y": -11.336461815952276,
+      "properties": {}
+    },
+    {
+      "id": "ntc_temperature_sensor_1790134664777_xn4w8tliy",
+      "metadataId": "ntc-temperature-sensor",
+      "x": 330.69528788502794,
+      "y": 223.31192291454647,
+      "properties": {
+        "rotation": 180,
+        "temperature": 52
+      }
+    }
+  ],
+  "wires": [
+    {
+      "waypoints": [
+        {
+          "x": 227.0138453606102,
+          "y": 116.37014975429565
+        },
+        {
+          "x": 227.0138453606102,
+          "y": 244
+        }
+      ],
+      "id": "wire-1790134768669",
+      "start": {
+        "componentId": "pro_dc_motor_1790134625330_9yo7kzxn4",
+        "pinName": "-",
+        "x": 351.6224854808206,
+        "y": 116.37014975429567
+      },
+      "end": {
+        "componentId": "esp32",
+        "pinName": "GND2",
+        "x": 184,
+        "y": 244
+      },
+      "color": "#000000",
+      "autoRouted": false
+    },
+    {
+      "waypoints": [
+        {
+          "x": 258.56906699847644,
+          "y": 206.50851128891296
+        },
+        {
+          "x": 258.56906699847644,
+          "y": 244
+        }
+      ],
+      "id": "wire-1790134754522",
+      "start": {
+        "componentId": "buzzer_1790134592638_bisq61qpe",
+        "pinName": "1",
+        "x": 372.57682137521556,
+        "y": 206.50851128891296
+      },
+      "end": {
+        "componentId": "esp32",
+        "pinName": "GND2",
+        "x": 184,
+        "y": 244
+      },
+      "color": "#000000",
+      "autoRouted": false
+    },
+    {
+      "waypoints": [
+        {
+          "x": 247.2993449849528,
+          "y": 5.66353818404772
+        },
+        {
+          "x": 247.2993449849528,
+          "y": 244
+        }
+      ],
+      "id": "wire-1790134866276",
+      "start": {
+        "componentId": "grove_relay_1790134646230_pvd2572ep",
+        "pinName": "GND",
+        "x": 433.70843589404376,
+        "y": 18.663538184047724
+      },
+      "end": {
+        "componentId": "esp32",
+        "pinName": "GND2",
+        "x": 184,
+        "y": 244
+      },
+      "color": "#000000",
+      "autoRouted": false
+    },
+    {
+      "waypoints": [
+        {
+          "x": 217.24675294888968,
+          "y": 307.1119229145465
+        },
+        {
+          "x": 217.24675294888968,
+          "y": 244
+        }
+      ],
+      "id": "wire-1790134901839",
+      "start": {
+        "componentId": "ntc_temperature_sensor_1790134664777_xn4w8tliy",
+        "pinName": "GND",
+        "x": 348.69528788502794,
+        "y": 307.1119229145465
+      },
+      "end": {
+        "componentId": "esp32",
+        "pinName": "GND2",
+        "x": 184,
+        "y": 244
+      },
+      "color": "#000000",
+      "autoRouted": false
+    },
+    {
+      "waypoints": [
+        {
+          "x": -3.6397985161741104,
+          "y": 287.81192291454647
+        },
+        {
+          "x": -3.6397985161741104,
+          "y": 117
+        }
+      ],
+      "id": "wire-1790135528763",
+      "start": {
+        "componentId": "ntc_temperature_sensor_1790134664777_xn4w8tliy",
+        "pinName": "OUT",
+        "x": 348.69528788502794,
+        "y": 287.81192291454647
+      },
+      "end": {
+        "componentId": "esp32",
+        "pinName": "34",
+        "x": 56,
+        "y": 117
+      },
+      "color": "#22c55e",
+      "autoRouted": false
+    },
+    {
+      "waypoints": [
+        {
+          "x": 184,
+          "y": 297.51192291454646
+        }
+      ],
+      "id": "wire-1790135545450",
+      "start": {
+        "componentId": "ntc_temperature_sensor_1790134664777_xn4w8tliy",
+        "pinName": "VCC",
+        "x": 348.69528788502794,
+        "y": 297.51192291454646
+      },
+      "end": {
+        "componentId": "esp32",
+        "pinName": "3V3",
+        "x": 184,
+        "y": 257
+      },
+      "color": "#cc0000",
+      "autoRouted": true
+    },
+    {
+      "waypoints": [
+        {
+          "x": 30.920682325298458,
+          "y": 16.66353818404772
+        },
+        {
+          "x": 30.920682325298458,
+          "y": 257
+        }
+      ],
+      "id": "wire-1790135556315",
+      "start": {
+        "componentId": "grove_relay_1790134646230_pvd2572ep",
+        "pinName": "VCC",
+        "x": 433.70843589404376,
+        "y": 29.663538184047724
+      },
+      "end": {
+        "componentId": "esp32",
+        "pinName": "VIN",
+        "x": 56,
+        "y": 257
+      },
+      "color": "#cc0000",
+      "autoRouted": false
+    },
+    {
+      "waypoints": [
+        {
+          "x": 16.645701108168485,
+          "y": 38.663538184047724
+        },
+        {
+          "x": 16.645701108168485,
+          "y": 181
+        }
+      ],
+      "id": "wire-1790135573466",
+      "start": {
+        "componentId": "grove_relay_1790134646230_pvd2572ep",
+        "pinName": "SIG",
+        "x": 433.70843589404376,
+        "y": 51.663538184047724
+      },
+      "end": {
+        "componentId": "esp32",
+        "pinName": "26",
+        "x": 56,
+        "y": 181
+      },
+      "color": "#22c55e",
+      "autoRouted": false
+    },
+    {
+      "waypoints": [
+        {
+          "x": 372.57682137521556,
+          "y": -34.38905379469462
+        },
+        {
+          "x": 101.31877136230469,
+          "y": -34.38905379469462
+        },
+        {
+          "x": 56,
+          "y": -34.38905379469462
+        }
+      ],
+      "id": "wire-1790135617780",
+      "start": {
+        "componentId": "buzzer_1790134592638_bisq61qpe",
+        "pinName": "2",
+        "x": 372.57682137521556,
+        "y": 216.50851128891296
+      },
+      "end": {
+        "componentId": "esp32",
+        "pinName": "25",
+        "x": 56,
+        "y": 168
+      },
+      "color": "#22c55e",
+      "autoRouted": false
+    },
+    {
+      "waypoints": [
+        {
+          "x": 266.56906699847644,
+          "y": 257
+        },
+        {
+          "x": 266.56906699847644,
+          "y": -27.62722058658042
+        },
+        {
+          "x": 392.1784358940438,
+          "y": -27.62722058658042
+        }
+      ],
+      "id": "wire-1790136490091",
+      "start": {
+        "componentId": "esp32",
+        "pinName": "VIN",
+        "x": 56,
+        "y": 257
+      },
+      "end": {
+        "componentId": "grove_relay_1790134646230_pvd2572ep",
+        "pinName": "COM",
+        "x": 468.1784358940438,
+        "y": 21.313538184047722
+      },
+      "color": "#cc0000",
+      "autoRouted": false
+    },
+    {
+      "waypoints": [
+        {
+          "x": 468.1784358940438,
+          "y": 143.00851128891296
+        },
+        {
+          "x": 351.6224854808206,
+          "y": 143.00851128891296
+        }
+      ],
+      "id": "wire-1790136510454",
+      "start": {
+        "componentId": "grove_relay_1790134646230_pvd2572ep",
+        "pinName": "NO",
+        "x": 468.1784358940438,
+        "y": 34.61353818404773
+      },
+      "end": {
+        "componentId": "pro_dc_motor_1790134625330_9yo7kzxn4",
+        "pinName": "+",
+        "x": 351.6224854808206,
+        "y": 148.37014975429565
+      },
+      "color": "#cc0000",
+      "autoRouted": true
+    },
+    {
+      "waypoints": [],
+      "id": "wire-1790136514669",
+      "start": {
+        "componentId": "pro_dc_motor_1790134625330_9yo7kzxn4",
+        "pinName": "+",
+        "x": 351.6224854808206,
+        "y": 148.37014975429565
+      },
+      "end": {
+        "componentId": "pro_dc_motor_1790134625330_9yo7kzxn4",
+        "pinName": "+",
+        "x": 351.6224854808206,
+        "y": 148.37014975429565
+      },
+      "color": "#cc0000",
+      "autoRouted": true
+    }
+  ],
+  "activeBoardId": "esp32"
+}
